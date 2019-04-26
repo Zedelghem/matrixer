@@ -2,6 +2,7 @@
 A tool to quickly generate input files for MrBayes
 
 ## FAQ
+
 **Q:** What does Matrixer do?
 **A:** It prepares fasta files for MrBayes from the alignments and feature matrices.
 
