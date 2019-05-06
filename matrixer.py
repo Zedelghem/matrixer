@@ -128,7 +128,7 @@ def addMatrixAtTail(fastaList, uniMatrix, multiplier):
     INTola_uni_core_fasta = []
     for line in fastaList:
         if line[0].startswith(">PF"):
-            for mLine in uniMatrix[1:]:
+            for mLine in uniMatrix:
                 if line[0].startswith(">" + mLine[0]):
                     INTola_uni_core_fasta.append([line[0], line[1] + (multiplier * mLine[1])])
         else:
