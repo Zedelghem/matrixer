@@ -88,7 +88,8 @@ try:
         alignment = []
 
         for line in alpha_plik:
-            alignment.append([">" + line[0], "".join(line[1:])])
+            # Deleting / and - from the PF name to make sure the nexus file is generated without ' '
+            alignment.append([">" + line[0].replace("/", "_").replace("-", "_"), "".join(line[1:])])
 except:
     print("Could not parse the alignment file. Make sure the path is right and that the file is properly formatted.")
     sys.exit()
