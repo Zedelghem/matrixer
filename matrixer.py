@@ -13,7 +13,7 @@ params = [x.strip() for x in S_ARGUMENTS.split("-") if x != ""]
 
 # Check if all the parameters exist on the list of legal parameters.
 # If something is wrong, kill the script.
-legal_parameters = ["a", "alignment", "f", "features", "m", "multiplications", "b", "binarize", "d", "destination"]
+legal_parameters = ["a", "alignment", "t", "typedata", "f", "features", "m", "multiplications", "b", "binarize", "d", "destination", 'e', 'exportdata']
 if not all([x.split()[0] in legal_parameters for x in params]):
     print("One of the parameters you provided does not exist. Do consult the README file.")
     sys.exit()
@@ -76,6 +76,26 @@ else:
     if not os.path.exists(arguments["d"][0]):
         print("The destination directory you provided does not exist. Pick another one.")
         sys.exit()
+
+# Check if exportdata has been flagged
+if "e" not in arguments.keys():
+    export = False
+else:
+    export = True
+    feature_types = arguments["e"]
+
+# Check if alignment datatype different than protein
+if "t" not in arguments.keys():
+    alignment_datatype = "protein"
+elif len(arguments["t"]) > 1:
+    print("Too many alignment datatypes provided. After -t there must be only one argument.")
+    sys.exit()
+else:
+    if arguments["t"][0].lower() not in ["protein", "dna"]:
+        print("Wrong alignment datatype.")
+        sys.exit()
+    else:
+        alignment_datatype = arguments["t"][0]
 
 ###########################################################################
 # MAIN PART
@@ -177,4 +197,47 @@ for ind, feat in enumerate(arguments["f"]):
     nameparts.append(multip + feat.split(".")[0] + binarized)
 
 # Save to file
-saveFasta(arguments["d"][0] + "/" + arguments["a"][0].split(".")[0] + "+" + "+".join(nameparts), dump)
+file_name_blueprint = arguments["a"][0].split(".")[0] + "+" + "+".join(nameparts)
+saveFasta(arguments["d"][0] + "/" + file_name_blueprint, dump)
+
+# Convert to nexus
+if export:
+    os.system("mkdir nexus")
+    os.system("seqmagick convert --output-format nexus --alphabet protein " + arguments["d"][0] + "/" + file_name_blueprint + ".fasta" + " nexus/" + file_name_blueprint + ".nexus")
+
+    # Modify nexus header
+    with open("nexus/" + file_name_blueprint + ".nexus", "r") as nexus_raw:
+        nexus_file = nexus_raw.readlines()
+
+    # Store info about length of a line of every feature matrix
+    feature_lengths = [len(x[0][1]) for x in features]
+
+    # Create a list of tuples (dataformat, feature line length * multiplication factor)
+    feature_info = []
+    for ind, feat in enumerate(features):
+        feature_info.append(tuple([feature_types[ind], feature_lengths[ind] * arguments["m"][ind]]))
+    
+    #print(feature_info)
+
+    format_line = nexus_file[3].split()
+    alignment_seq_len = len(alignment[1][1])
+    #print(alignment_seq_len)
+
+    # Generate the feature part of the datatype declaration
+    feature_ranges = []
+    for ind, feat in enumerate(feature_info):
+        if ind > 0:
+            feature_ranges.append(feat[0] + ": " + str(int(feature_ranges[-1].split("-")[-1]) + 1) + "-" + str(int(feature_ranges[-1].split("-")[-1]) + feat[1]))
+        else:
+            feature_ranges.append(feat[0] + ": " + str(alignment_seq_len + 1) + "-" + str(alignment_seq_len + feat[1]))
+    
+    #print(feature_ranges)
+
+    format_line[1] = "datatype=mixed(" + alignment_datatype + ": 1-" + str(alignment_seq_len) + ", " + ", ".join(feature_ranges) + ")"
+
+    # Append the line to the header
+    nexus_file[3] = "	" + " ".join(format_line) + "\n"
+
+    # Overwrite the file
+    with open("nexus/" + file_name_blueprint + ".nexus", "w") as nexus_out:
+        nexus_out.write("".join(nexus_file))
