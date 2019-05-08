@@ -224,6 +224,7 @@ if export:
     #print(alignment_seq_len)
 
     # Generate the feature part of the datatype declaration
+    # If a feature has binarize set to True, then enforce datatype "restriction"
     feature_ranges = []
     for ind, feat in enumerate(feature_info):
         if ind > 0:
@@ -238,6 +239,6 @@ if export:
     # Append the line to the header
     nexus_file[3] = "	" + " ".join(format_line) + "\n"
 
-    # Overwrite the file
+    # Overwrite the nexus file
     with open("nexus/" + file_name_blueprint + ".nexus", "w") as nexus_out:
         nexus_out.write("".join(nexus_file))

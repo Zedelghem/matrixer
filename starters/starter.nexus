@@ -1,0 +1,9 @@
+begin mrbayes;
+    set autoclose=yes nowarn=yes quitonerror=no;
+    Execute runfile.nexus;
+    lset applyto=(1,2,3) rates=gamma;
+    prset applyto=(1) aamodelpr=fixed(lg);
+    unlink statefreq=(all) shape=(all); 
+    prset applyto=(all) ratepr=variable;
+    Mcmc ngen=10000000 append=no file=runfile.nexus;
+end;
