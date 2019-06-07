@@ -81,6 +81,7 @@ else:
 if "e" not in arguments.keys():
     export = False
 else:
+    # If flagged: require datatypes after -e (restriction, standard, protein, dna)
     export = True
     feature_types = arguments["e"]
 

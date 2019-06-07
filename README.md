@@ -4,7 +4,7 @@ A tool to quickly generate input files for MrBayes
 ## FAQ
 **Q:** What does Matrixer do?
 
-**A:** It prepares fasta files for MrBayes from the alignments and feature matrices.
+**A:** It prepares fasta and/or nexus files for MrBayes from the alignments and feature matrices.
 
 
 **Q:** What are the inputs?
@@ -23,6 +23,11 @@ A tool to quickly generate input files for MrBayes
 --destination, -d       Path to the destination folder where the output will be saved. The folder must exist. The current folder
                         is the default value. You cannot choose the filename. It will be generated based on the name of the alignment 
                         file and the feature files.
+--exportdata, -e        If you flag this option, the script will convert the generated .fasta file to a .nexus file.
+                        If after the parameter you supply data types (all datatypes available in MrBayes, so: restriction, standard, 
+                        dna, protein, etc.) of the respective feature matrices (keeping theorder from the --features list), the
+                        script will adjust the .nexus file header to include the datatype ranges.
+--typedata, -t          --typedata sets the data type of the alignment. Available values: all MrBayes datatypes. Protein by default.
 ```
 
 **CAREFUL:** If by accident you use both the GNU and UNIX parameter definitions, the script will take the last value.
@@ -30,5 +35,7 @@ A tool to quickly generate input files for MrBayes
 ## Examples:
 
 `./matrixer.py -a two_cores_alignments.fasta -f nc_matrix.csv clans_matrix.csv -m 1 10 -b T F -d fasta`
+
+`./matrixer.py -a two_cores_alignments.fasta -f nc_matrix.csv clans_matrix.csv -m 1 10 -b T F -d fasta -e restriction standard`
 
 `./matrixer.py -a two_cores_alignments.fasta --features nc_matrix.csv clans_matrix.csv -m 1 10 --binarize T F -destination fasta`
